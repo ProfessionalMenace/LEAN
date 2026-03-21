@@ -1,4 +1,11 @@
-# My folder of lean projects
+# LEAN
+Collection of personal projects I wrote in Lean4.
+
+## Content
+.
+├── ProjectEuler (project Euler solutions)
+├── Proofs (collection of elementary proofs) 
+└── TPIL (solutions to problems from TPIL book)
 
 ## Resource Dump
 * Lean Adjacent Games: https://adam.math.hhu.de/ 
