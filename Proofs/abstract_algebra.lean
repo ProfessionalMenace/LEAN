@@ -48,10 +48,14 @@ theorem inv_unique {α : Type u} {G : Group α} {a b c: α} (hab : a * b = G.e) 
   ]
 
 -- double inverse eq itself
-theorem double_inv {α : Type u} {G : Group α} {a b c: α} :
-  a * b = G.e ∧ b * c = G.e → c = a := by
-    rintro ⟨hab, hbc⟩
-    rw [← G.identity_mul c, ← hab, G.mul_assoc, hbc, G.mul_identity]
+theorem double_inv {α : Type u} {G : Group α} {a : α} : G.inv (G.inv a) = a := by
+  rw [
+    ← G.identity_mul (G.inv (G.inv a)),
+    ← G.right_inverse a,
+    G.mul_assoc,
+    G.right_inverse,
+    G.mul_identity
+  ]
 
 -- pair multiplication inverses
 theorem pair_inverse {α : Type u} {G : Group α} {a b : α} :  G.inv (a * b) = (G.inv b) * (G.inv a) := by
@@ -68,8 +72,7 @@ theorem pair_inverse {α : Type u} {G : Group α} {a b : α} :  G.inv (a * b) = 
   ]
 
 -- Group left cancelation
-theorem left_cancel {α : Type u} {G : Group α} {a b c : α}
-  (h : a * b = a * c) : b = c := by
+theorem left_cancel {α : Type u} {G : Group α} {a b c : α} (h : a * b = a * c) : b = c := by
   rw [
     ← G.identity_mul b,
     ← G.identity_mul c,
@@ -80,8 +83,7 @@ theorem left_cancel {α : Type u} {G : Group α} {a b c : α}
   ]
 
 -- Group right cancelation
-theorem right_cancel {α : Type u} {G : Group α} {a b c : α} : b * a = c * a → b = c := by
-  intro h
+theorem right_cancel {α : Type u} {G : Group α} {a b c : α} (h : b * a = c * a) : b = c := by
   rw [
     ← G.mul_identity b,
     ← G.mul_identity c,
