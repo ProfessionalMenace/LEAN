@@ -10,35 +10,83 @@ class Monoid (M : Type u) extends Semigroup M where
 
 -- Group
 class Group (G : Type u) extends Monoid G where
-  right_inverse (a : G) : ∃(b : G), a * b = e
-  left_inverse (a : G) : ∃(b : G), b * a = e
+  inv : G → G
+  right_inverse (a : G) : a  * (inv a) = e
+  left_inverse  (a : G) : (inv a) * a  = e
 
--- Abelian Group (todo)
+-- Abelian Group
 class AbelianGroup (G : Type u) extends Group G where
   mul_comm (a b : G) : a * b = b * a
 
--- unique identity of a Monoid
-theorem id_unique {α : Type u} {M : Monoid α} (a b : α) : (a = M.e) ∧ (b = M.e) → (a = b) := sorry
+-- (trivial) unique identity of a Monoid
+theorem id_unique {α : Type u} {M : Monoid α} {a b : α} (ha : a = M.e) (hb : b = M.e) : (a = b) := by
+ rw [ha, hb]
+
+-- (trivial) commutativity of inverses
+theorem inv_comm {α : Type u} {G : Group α} {a: α} : a * G.inv a = G.inv a * a := by
+  rw [G.right_inverse, G.left_inverse]
+
+-- (trivial) element is inverse
+theorem mul_eq_one_iff_inv {α : Type u} {G : Group α} {a b: α} (h: a * b = G.e) : b = G.inv a := by
+  rw [
+    ← G.mul_identity (Group.inv a),
+    ← h,
+    ← G.mul_assoc,
+    G.left_inverse,
+    G.identity_mul,
+  ]
 
 -- unique inverses of a Group
-theorem inv_unique {α : Type u} {G : Group α} (a b c : α) : (a * b = G.e) ∧ (a * c = G.e) → (a = b) := sorry
+theorem inv_unique {α : Type u} {G : Group α} {a b c: α} (hab : a * b = G.e) (hac : a * c = G.e) : (b = c) := by
+  rw [
+    ← G.mul_identity b,
+    ← hac,
+    ← G.mul_assoc,
+    mul_eq_one_iff_inv hab,
+    G.left_inverse,
+    G.identity_mul
+  ]
 
 -- double inverse eq itself
-theorem double_inv {α : Type u} {G : Group α} (a : α) :
-  ∃(b : α), a * b = G.e
-  ∧ ∃(c : α), (a * b) * c = G.e
-  → c = a := sorry
+theorem double_inv {α : Type u} {G : Group α} {a b c: α} :
+  a * b = G.e ∧ b * c = G.e → c = a := by
+    rintro ⟨hab, hbc⟩
+    rw [← G.identity_mul c, ← hab, G.mul_assoc, hbc, G.mul_identity]
 
 -- pair multiplication inverses
-theorem pair_inverse {α : Type u} {G : Group α} (a b: α) :
-  ∃(a' : α), a * a' = G.e
-  ∧ ∃(b' : α), b * b' = G.e
-  ∧ ∃(ab' : α), (a * b) * ab' = G.e
-  → ab' = b' * a'
-  := sorry
+theorem pair_inverse {α : Type u} {G : Group α} {a b : α} :  G.inv (a * b) = (G.inv b) * (G.inv a) := by
+  rw [
+    ← G.mul_identity (G.inv b * G.inv a),
+    ← G.right_inverse (a * b),
+    ← G.mul_assoc,
+    ← G.mul_assoc,
+    G.mul_assoc (G.inv b),
+    G.left_inverse,
+    G.mul_identity,
+    G.left_inverse,
+    G.identity_mul,
+  ]
 
 -- Group left cancelation
-theorem left_cancel {α : Type u} {G : Group α} (a b c : α) : a * b = a * c → b = c := sorry
+theorem left_cancel {α : Type u} {G : Group α} {a b c : α}
+  (h : a * b = a * c) : b = c := by
+  rw [
+    ← G.identity_mul b,
+    ← G.identity_mul c,
+    ← G.left_inverse a,
+    G.mul_assoc _ a b,
+    G.mul_assoc _ a c,
+    h
+  ]
 
 -- Group right cancelation
-theorem right_cancel {α : Type u} {G : Group α} (a b c : α) : b * a = c * a → b = c := sorry
+theorem right_cancel {α : Type u} {G : Group α} {a b c : α} : b * a = c * a → b = c := by
+  intro h
+  rw [
+    ← G.mul_identity b,
+    ← G.mul_identity c,
+    ← G.right_inverse a,
+    ← G.mul_assoc b a _,
+    ← G.mul_assoc c a _,
+    h
+  ]
